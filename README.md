@@ -1,8 +1,9 @@
 # fronius_gen24
 LCD display for Fronius Gen24 and SmartMeter
 
-Support Product
-T-Display-S3
+Supported Product
+
+Lilygo T-Display-S3
 
 PlatformIO Quick Start (Recommended)
 
