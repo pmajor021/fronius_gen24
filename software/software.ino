@@ -7,6 +7,7 @@
 #include "time.h"
 #include "HTTPClient.h"
 #include "user_secrets.h"
+#include "fronius_logo.h"
 
 WiFiClient wifiClient;
 
@@ -42,7 +43,7 @@ uint32_t runing = 0;
 void setup(void)
 {
   Serial.begin(115200);
-  Serial.println("Hello T-Display-S3");
+  Serial.println("Hello");
 
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
@@ -51,12 +52,8 @@ void setup(void)
   tft.init();
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
-
-  tft.fillScreen(TFT_RED);
-  delay(1000);
-  tft.fillScreen(TFT_GREEN);
-  delay(1000);
-  tft.fillScreen(TFT_BLUE);
+  tft.setSwapBytes(true);
+  tft.pushImage(0, 0, 320, 170, (uint16_t *)fronius_logo);
   delay(1000);
 
   targetTime = millis() + 1000;
@@ -71,7 +68,7 @@ void setup(void)
   {
     Serial.print(".");
     tft.print(".");
-    delay(1000);
+    delay(2000);
   }
   Serial.println("");
   tft.println("");
