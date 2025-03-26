@@ -1,5 +1,6 @@
 # fronius_gen24
 LCD display for Fronius Gen24 and SmartMeter
+![IMG_0664](https://github.com/user-attachments/assets/ace65480-dd41-408c-989c-845e8e2832ae)
 
 ## Supported Product
 
