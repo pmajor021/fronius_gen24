@@ -1,8 +1,4 @@
 ![GitHub release (with filter)](https://img.shields.io/github/v/release/pmajor021/fronius_gen24?color=%23008000)
-[![PlatformIO CI](https://github.com/pmajor021/fronius_gen24/actions/workflows/platformio.yml/badge.svg)](https://github.com/pmajor021/fronius_gen24/actions/workflows/platformio.yml)
-[![Arduino CI](https://github.com/pmajor021/fronius_gen24/actions/workflows/platformio.yml/badge.svg)](https://github.com/pmajor021/fronius_gen24/actions/workflows/platformio.yml)
-
-
 
 # fronius_gen24
 Information display for Fronius Gen24 Inverter and SmartMeter
