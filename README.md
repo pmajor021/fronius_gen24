@@ -1,6 +1,13 @@
 # fronius_gen24
 LCD display for Fronius Gen24 and SmartMeter
+
 ![fronius_gen24 on Lilygo T-Display-3](https://github.com/user-attachments/assets/ace65480-dd41-408c-989c-845e8e2832ae)
+
+GR - grid (red - from grid, green - to grid)
+PV - Power from Inverter (Batt. + Solar) / Power from solar
+LD - Load 
+B - Battery SoC
+L1-3 - Power on each phase (red - from grid, green to grid)
 
 ## Supported Product
 
