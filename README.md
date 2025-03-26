@@ -1,3 +1,5 @@
+![GitHub release (with filter)](https://img.shields.io/github/v/release/pmajor021/fronius_gen24?color=%23008000)
+
 # fronius_gen24
 Information display for Fronius Gen24 Inverter and SmartMeter
 
