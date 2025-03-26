@@ -12,7 +12,7 @@ L1-3 - Power on each phase (red - from grid, green to grid)
 ## Supported Product
 
 Lilygo T-Display-S3
-https://www.lilygo.cc/products/t-display-s3?variant=42589373268149
+[https://www.lilygo.cc/products/t-display-s3?variant=42589373268149](https://lilygo.cc/products/t-display-s3?variant=42585826590901)
 
 ## PlatformIO Quick Start (Recommended)
 1. Install [Visual Studio Code](https://code.visualstudio.com/) and [Python](https://www.python.org/)
