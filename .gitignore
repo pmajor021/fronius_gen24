@@ -54,5 +54,5 @@ Mkfile.old
 dkms.conf
 build
 script
-src/software/user_secrets.h
+/software/src/user_secrets.h
 .DS_Store
