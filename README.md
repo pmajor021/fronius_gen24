@@ -22,7 +22,7 @@ https://www.lilygo.cc/products/t-display-s3?variant=42589373268149
 ## Arduino IDE Manual installation
 
 1. Install [Arduino IDE](https://www.arduino.cc/en/software)
-2. Download `fronius_gen24` , move to Arduino library folder (e.g. C:\Users\YourName\Documents\Arduino\)
+2. Download `fronius_gen24` , move to Arduino folder (e.g. C:\Users\YourName\Documents\Arduino\)
 3. Copy all folders in [lib folder](./lib/) to Arduino library folder (e.g. C:\Users\YourName\Documents\Arduino\libraries)
 4. Enter the downloaded `software` directory
 5. Open ArduinoIDE ,`Tools` ，Make your selection according to the table below
