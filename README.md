@@ -5,6 +5,7 @@ Supported Product
 
 Lilygo T-Display-S3
 
+
 PlatformIO Quick Start (Recommended)
 
 Install Visual Studio Code and Python
@@ -28,6 +29,7 @@ Connect the board to the computer USB
 Click (→) to upload firmware
 
 Click (plug symbol) to monitor serial output
+
 
 Arduino IDE Manual installation
 
