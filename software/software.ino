@@ -12,7 +12,7 @@
 WiFiClient wifiClient;
 
 #define MY_NTP_SERVER "pool.ntp.org"
-#define MY_TZ "CET-1CEST,M3.5.0/02,M10.5.0/03"
+#define MY_TZ "CET-1CEST,M3.5.0/02,M10.5.0/03"                                    // Timezone Central European Time
 #define topbutton 0
 
 String ssid = WIFI_SSID;
@@ -33,21 +33,21 @@ TFT_eSPI tft = TFT_eSPI();
 
 unsigned long targetTime = 0;
 
-float etotal_p = 0; // Variable to store etotal value at midnight
+float etotal_p = 0;                                                               // Variable to store etotal value at midnight
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Hello");
 
-  pinMode(PIN_POWER_ON, OUTPUT);
-  digitalWrite(PIN_POWER_ON, HIGH);
-  pinMode(topbutton, INPUT);
+  pinMode(PIN_POWER_ON, OUTPUT);                                                  // Set the power pin as output
+  digitalWrite(PIN_POWER_ON, HIGH);                                               // Turn on the display
+  pinMode(topbutton, INPUT);                                                      // Set the button pin as input
 
-  tft.init();
+  tft.init(); // Initialize the TFT
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
   tft.setSwapBytes(true);
-  tft.pushImage(0, 0, 320, 170, (uint16_t *)fronius_logo);
+  tft.pushImage(0, 0, 320, 170, (uint16_t *)fronius_logo);                        // Display the Fronius logo
 
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
@@ -65,11 +65,11 @@ void setup() {
   configTime(3600, 3600, MY_NTP_SERVER);
 }
 
-void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&jsonObject) {
+void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&jsonObject) { // Fetch the data from the Fronius API
   HTTPClient http;
-  http.begin(wifiClient, url);
-  int httpCode = http.GET();
-  String httpResponse = http.getString();
+  http.begin(wifiClient, url);    
+  int httpCode = http.GET();                                                      // Make the request
+  String httpResponse = http.getString();                                         // Get the response
   http.end();
 
   Serial.print("URL: ");
@@ -77,7 +77,7 @@ void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&js
   Serial.print("HTTP Status: ");
   Serial.println(httpCode);
 
-  jsonObject = &jsonBuffer.parseObject(httpResponse);
+  jsonObject = &jsonBuffer.parseObject(httpResponse);                             // Parse the JSON
   if (!jsonObject->success()) {
     Serial.println("JSON-Parser: Fail");
   } else {
@@ -85,7 +85,7 @@ void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&js
   }
 }
 
-void displayData(float value, const char *label, uint16_t color, bool invert = false) {
+void displayData(float value, const char *label, uint16_t color, bool invert = false) { // Display the data on the TFT
   tft.setTextColor(color);
   tft.print(label);
   tft.print(invert ? value * -1 : value, 0);
@@ -96,31 +96,31 @@ void loop() {
   DynamicJsonBuffer jsonBufferMeter(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
   DynamicJsonBuffer jsonBufferFlow(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
 
-  static int previousHour = -1; // Track the previous hour
+  static int previousHour = -1;                                                   // Track the previous hour
   time(&now);
-  localtime_r(&now, &tm);
+  localtime_r(&now, &tm);                                                         // Get the time
   Serial.print("Hour: ");
   Serial.println(tm.tm_hour);
 
   JsonObject *jsonMeter = nullptr;
   fetchData(urlMeter, jsonBufferMeter, jsonMeter);
 
-  float l1p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_1"] | 0;
-  float l2p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_2"] | 0;
-  float l3p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_3"] | 0;
+  float l1p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_1"] | 0;            // Get the power value for phase 1
+  float l2p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_2"] | 0;            // Get the power value for phase 2
+  float l3p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_3"] | 0;            // Get the power value for phase 3
 
   JsonObject *jsonFlow = nullptr;
   fetchData(urlFlow, jsonBufferFlow, jsonFlow);
 
-  float etotal = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_Total"] | 0;
-  float soc = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0;
-  float p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["P"] | 0;
-  float in_out = (*jsonFlow)["Body"]["Data"]["Site"]["P_Grid"] | 0;
-  float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;
-  float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;
+  float etotal = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_Total"] | 0;    // Get the total energy produced 
+  float soc = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0;           // Get the battery state of charge
+  float p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["P"] | 0;               // Get the power value for the Inverter
+  float in_out = (*jsonFlow)["Body"]["Data"]["Site"]["P_Grid"] | 0;               // Get the power value for the grid
+  float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;                 // Get the power value for the load
+  float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;                   // Get the power value for the Solar
 
   if (previousHour == 23 && tm.tm_hour == 0) {
-    etotal_p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0; // Store data
+    etotal_p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0;      // Store total energy produced at midnight
     Serial.print("Stored E_TOTAL: ");
     Serial.println(etotal_p);
   }
@@ -131,28 +131,28 @@ void loop() {
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(0, 0);
 
-  displayData(in_out, "GR: ", in_out >= 0 ? TFT_RED : TFT_GREEN, in_out < 0);
+  displayData(in_out, "GR: ", in_out >= 0 ? TFT_RED : TFT_GREEN, in_out < 0);     // Display the power value for the grid
   tft.setTextSize(3);
   tft.setTextColor(TFT_YELLOW);
   tft.print("PV: ");
-  tft.print(p, 0);
+  tft.print(p, 0);                                                                // Display the power value for the Inverter
   tft.print("W / ");
   tft.print(prod, 0);
-  tft.println("W");
+  tft.println("W");                                                               // Display the power value for the Solar
   tft.setTextColor(TFT_LIGHTGREY);
   tft.print("LD: ");
-  tft.print(cons * -1, 0);
+  tft.print(cons * -1, 0);                                                        // Display the power value for the load
   tft.print("W B: ");
-  tft.print(soc, 0);
+  tft.print(soc, 0);                                                              // Display the battery state of charge
   tft.println("%");
 
-  displayData(l1p, "L1: ", l1p >= 0 ? TFT_RED : TFT_GREEN, l1p < 0);
-  displayData(l2p, "L2: ", l2p >= 0 ? TFT_RED : TFT_GREEN, l2p < 0);
-  displayData(l3p, "L3: ", l3p >= 0 ? TFT_RED : TFT_GREEN, l3p < 0);
+  displayData(l1p, "L1: ", l1p >= 0 ? TFT_RED : TFT_GREEN, l1p < 0);              // Display the power value for phase 1
+  displayData(l2p, "L2: ", l2p >= 0 ? TFT_RED : TFT_GREEN, l2p < 0);              // Display the power value for phase 2
+  displayData(l3p, "L3: ", l3p >= 0 ? TFT_RED : TFT_GREEN, l3p < 0);              // Display the power value for phase 3
 
   tft.setTextColor(TFT_LIGHTGREY);
   tft.print("ED: ");
-  tft.print(etotal - etotal_p, 0); // Display the difference between etotal and etotal_p
+  tft.print(etotal - etotal_p, 0);                                                // Display the energy produced today
   tft.println("Wh");
 
   delay(5000);
