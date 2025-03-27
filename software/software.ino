@@ -112,7 +112,7 @@ void loop() {
   JsonObject *jsonFlow = nullptr;
   fetchData(urlFlow, jsonBufferFlow, jsonFlow);
 
-  float etotal = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0;
+  float etotal = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_Total"] | 0;
   float soc = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0;
   float p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["P"] | 0;
   float in_out = (*jsonFlow)["Body"]["Data"]["Site"]["P_Grid"] | 0;
