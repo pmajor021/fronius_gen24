@@ -33,6 +33,8 @@ TFT_eSPI tft = TFT_eSPI();
 
 unsigned long targetTime = 0;
 
+float etotal_p = 0; // Variable to store etotal value at midnight
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Hello");
@@ -94,6 +96,7 @@ void loop() {
   DynamicJsonBuffer jsonBufferMeter(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
   DynamicJsonBuffer jsonBufferFlow(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
 
+  static int previousHour = -1; // Track the previous hour
   time(&now);
   localtime_r(&now, &tm);
   Serial.print("Hour: ");
@@ -109,13 +112,22 @@ void loop() {
   JsonObject *jsonFlow = nullptr;
   fetchData(urlFlow, jsonBufferFlow, jsonFlow);
 
+  float etotal = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0;
   float soc = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0;
   float p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["P"] | 0;
   float in_out = (*jsonFlow)["Body"]["Data"]["Site"]["P_Grid"] | 0;
   float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;
   float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;
 
-  tft.setTextSize(4);
+  if (previousHour == 23 && tm.tm_hour == 0) {
+    etotal_p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0; // Store data
+    Serial.print("Stored E_TOTAL: ");
+    Serial.println(etotal_p);
+  }
+  previousHour = tm.tm_hour;
+
+
+  tft.setTextSize(3);
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(0, 0);
 
@@ -137,6 +149,11 @@ void loop() {
   displayData(l1p, "L1: ", l1p >= 0 ? TFT_RED : TFT_GREEN, l1p < 0);
   displayData(l2p, "L2: ", l2p >= 0 ? TFT_RED : TFT_GREEN, l2p < 0);
   displayData(l3p, "L3: ", l3p >= 0 ? TFT_RED : TFT_GREEN, l3p < 0);
+
+  tft.setTextColor(TFT_LIGHTGREY);
+  tft.print("ED: ");
+  tft.print(etotal - etotal_p, 0); // Display the difference between etotal and etotal_p
+  tft.println("Wh");
 
   delay(5000);
 }
