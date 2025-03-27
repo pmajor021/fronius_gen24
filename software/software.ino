@@ -120,7 +120,7 @@ void loop() {
   float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;                   // Get the power value for the Solar
 
   if (previousHour == -1)  
-    etotal_p = etotal;                                                            // Store total energy at startup
+    etotal_p = etotal;                                                            // Store total energy produced at startup
   
   if (previousHour == 23 && tm.tm_hour == 0) {
     etotal_p = etotal;                                                            // Store total energy produced at midnight
