@@ -119,8 +119,11 @@ void loop() {
   float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;                 // Get the power value for the load
   float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;                   // Get the power value for the Solar
 
+  if (previousHour == -1)  
+    etotal_p = etotal;                                                            // Store total energy at startup
+  
   if (previousHour == 23 && tm.tm_hour == 0) {
-    etotal_p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["E_TOTAL"] | 0;      // Store total energy produced at midnight
+    etotal_p = etotal;                                                            // Store total energy produced at midnight
     Serial.print("Stored E_TOTAL: ");
     Serial.println(etotal_p);
   }
