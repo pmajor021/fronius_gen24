@@ -54,7 +54,7 @@ void setup(void)
   tft.fillScreen(TFT_BLACK);
   tft.setSwapBytes(true);
   tft.pushImage(0, 0, 320, 170, (uint16_t *)fronius_logo);
-  delay(1000);
+  //delay(1000);
 
   targetTime = millis() + 1000;
 
@@ -63,17 +63,17 @@ void setup(void)
   WiFi.begin(ssid.c_str(), password.c_str());
   delay(2000);
   Serial.print("Wait for WiFi... ");
-  tft.print("Wait for WiFi... ");
+  //tft.print("Wait for WiFi... ");
   while (WiFi.status() != WL_CONNECTED)
   {
     Serial.print(".");
-    tft.print(".");
+    //tft.print(".");
     delay(2000);
   }
   Serial.println("");
-  tft.println("");
+  //tft.println("");
   Serial.println("WiFi connection successful");
-  tft.println("WiFi connection successful");
+  //tft.println("WiFi connection successful");
   delay(3000);
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
