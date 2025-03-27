@@ -1,4 +1,4 @@
-#include "TFT_eSPI.h" // Graphics and font library for ST7735 driver chip
+#include "TFT_eSPI.h"
 #include "SPI.h"
 #include "pin_config.h"
 #include "Arduino.h"
@@ -20,8 +20,7 @@ String password = WIFI_PASSWORD;
 String urlMeter = "http://" + Fronius_IP + "/solar_api/v1/GetMeterRealtimeData.cgi?Scope=Device&DeviceId=0";
 String urlFlow = "http://" + Fronius_IP + "/solar_api/v1/GetPowerFlowRealtimeData.fcgi";
 
-typedef struct struct_message
-{
+typedef struct struct_message {
   bool State;
 } struct_message;
 
@@ -30,143 +29,97 @@ struct_message Button;
 time_t now;
 struct tm tm;
 
-TFT_eSPI tft = TFT_eSPI(); // Invoke library, pins defined in User_Setup.h
+TFT_eSPI tft = TFT_eSPI();
 
 unsigned long targetTime = 0;
-byte red = 31;
-byte green = 0;
-byte blue = 0;
-byte state = 0;
-unsigned int colour = red << 11;
-uint32_t runing = 0;
 
-void setup(void)
-{
+void setup() {
   Serial.begin(115200);
   Serial.println("Hello");
 
   pinMode(PIN_POWER_ON, OUTPUT);
   digitalWrite(PIN_POWER_ON, HIGH);
-  pinMode(topbutton, 0);
+  pinMode(topbutton, INPUT);
 
   tft.init();
   tft.setRotation(3);
   tft.fillScreen(TFT_BLACK);
   tft.setSwapBytes(true);
   tft.pushImage(0, 0, 320, 170, (uint16_t *)fronius_logo);
-  //delay(1000);
-
-  targetTime = millis() + 1000;
 
   WiFi.disconnect();
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid.c_str(), password.c_str());
-  delay(2000);
   Serial.print("Wait for WiFi... ");
-  //tft.print("Wait for WiFi... ");
-  while (WiFi.status() != WL_CONNECTED)
-  {
+  while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
-    //tft.print(".");
     delay(2000);
   }
-  Serial.println("");
-  //tft.println("");
-  Serial.println("WiFi connection successful");
-  //tft.println("WiFi connection successful");
-  delay(3000);
+  Serial.println("\nWiFi connection successful");
+
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
 
   configTime(3600, 3600, MY_NTP_SERVER);
 }
 
-void loop()
-{
-
+void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&jsonObject) {
   HTTPClient http;
-  const size_t capacityMeter = JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60;
-  const size_t capacityFlow = JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60;
+  http.begin(wifiClient, url);
+  int httpCode = http.GET();
+  String httpResponse = http.getString();
+  http.end();
 
-  DynamicJsonBuffer jsonBufferMeter(capacityMeter);
-  DynamicJsonBuffer jsonBufferFlow(capacityFlow);
+  Serial.print("URL: ");
+  Serial.println(url);
+  Serial.print("HTTP Status: ");
+  Serial.println(httpCode);
+
+  jsonObject = &jsonBuffer.parseObject(httpResponse);
+  if (!jsonObject->success()) {
+    Serial.println("JSON-Parser: Fail");
+  } else {
+    Serial.println("JSON-Parser: OK");
+  }
+}
+
+void displayData(float value, const char *label, uint16_t color, bool invert = false) {
+  tft.setTextColor(color);
+  tft.print(label);
+  tft.print(invert ? value * -1 : value, 0);
+  tft.println("W");
+}
+
+void loop() {
+  DynamicJsonBuffer jsonBufferMeter(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
+  DynamicJsonBuffer jsonBufferFlow(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
 
   time(&now);
   localtime_r(&now, &tm);
   Serial.print("Hour: ");
   Serial.println(tm.tm_hour);
 
-  // URL #1 - Meter Data
-  http.begin(wifiClient, urlMeter);
-  int httpCodeMeter = http.GET();
-  String httpResponseMeter = http.getString();
-  http.end();
+  JsonObject *jsonMeter = nullptr;
+  fetchData(urlMeter, jsonBufferMeter, jsonMeter);
 
-  Serial.print("URL:               ");
-  Serial.println(urlMeter);
-  Serial.print("HTTP Status:       ");
-  Serial.println(httpCodeMeter);
-  JsonObject &jsonMeter = jsonBufferMeter.parseObject(httpResponseMeter);
-  if (!jsonMeter.success())
-  {
-    Serial.println("JSON-Parser:       Fail");
-  }
-  else
-  {
-    Serial.println("JSON-Parser:       OK");
-  }
+  float l1p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_1"] | 0;
+  float l2p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_2"] | 0;
+  float l3p = (*jsonMeter)["Body"]["Data"]["PowerReal_P_Phase_3"] | 0;
 
-  float l1p = (jsonMeter["Body"]["Data"]["PowerReal_P_Phase_1"] | 0);
-  float l2p = (jsonMeter["Body"]["Data"]["PowerReal_P_Phase_2"] | 0);
-  float l3p = (jsonMeter["Body"]["Data"]["PowerReal_P_Phase_3"] | 0);
+  JsonObject *jsonFlow = nullptr;
+  fetchData(urlFlow, jsonBufferFlow, jsonFlow);
 
-  // URL #2 - Flow Data
-  http.begin(wifiClient, urlFlow);
-  int httpCodeFlow = http.GET();
-  String httpResponseFlow = http.getString();
-  http.end();
-
-  Serial.print("URL:               ");
-  Serial.println(urlFlow);
-  Serial.print("HTTP Status:       ");
-  Serial.println(httpCodeFlow);
-  JsonObject &jsonFlow = jsonBufferFlow.parseObject(httpResponseFlow);
-  if (!jsonFlow.success())
-  {
-    Serial.println("JSON-Parser:       Fail");
-  }
-  else
-  {
-    Serial.println("JSON-Parser:       OK");
-  }
-  Serial.println();
-  float soc = (jsonFlow["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0);
-  float p = (jsonFlow["Body"]["Data"]["Inverters"]["1"]["P"] | 0);
-  float in_out = (jsonFlow["Body"]["Data"]["Site"]["P_Grid"] | 0);
-  float cons = (jsonFlow["Body"]["Data"]["Site"]["P_Load"] | 0);
-  float prod = (jsonFlow["Body"]["Data"]["Site"]["P_PV"] | 0);
-  float autonomy = (jsonFlow["Body"]["Data"]["Site"]["rel_Autonomy"] | 0);
-  float selfcons = (jsonFlow["Body"]["Data"]["Site"]["rel_SelfConsumption"] | 0);
-
-  targetTime = millis();
+  float soc = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["SOC"] | 0;
+  float p = (*jsonFlow)["Body"]["Data"]["Inverters"]["1"]["P"] | 0;
+  float in_out = (*jsonFlow)["Body"]["Data"]["Site"]["P_Grid"] | 0;
+  float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;
+  float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;
 
   tft.setTextSize(4);
   tft.fillScreen(TFT_BLACK);
   tft.setCursor(0, 0);
-  if (in_out >= 0)
-  {
-    tft.setTextColor(TFT_RED);
-    tft.print("GR: ");
-    tft.print(in_out, 0);
-    tft.println("W");
-  }
-  else
-  {
-    tft.setTextColor(TFT_GREEN);
-    tft.print("GR: ");
-    tft.print(in_out * -1, 0);
-    tft.println("W");
-  }
+
+  displayData(in_out, "GR: ", in_out >= 0 ? TFT_RED : TFT_GREEN, in_out < 0);
   tft.setTextSize(3);
   tft.setTextColor(TFT_YELLOW);
   tft.print("PV: ");
@@ -180,48 +133,10 @@ void loop()
   tft.print("W B: ");
   tft.print(soc, 0);
   tft.println("%");
-  if (l1p >= 0)
-  {
-    tft.setTextColor(TFT_RED);
-    tft.print("L1: ");
-    tft.print(l1p, 0);
-    tft.println("W");
-  }
-  else
-  {
-    tft.setTextColor(TFT_GREEN);
-    tft.print("L1: ");
-    tft.print(l1p * -1, 0);
-    tft.println("W");
-  }
-  if (l2p >= 0)
-  {
-    tft.setTextColor(TFT_RED);
-    tft.print("L2: ");
-    tft.print(l2p, 0);
-    tft.println("W");
-  }
-  else
-  {
-    tft.setTextColor(TFT_GREEN);
-    tft.print("L2: ");
-    tft.print(l2p * -1, 0);
-    tft.println("W");
-  }
-  if (l3p >= 0)
-  {
-    tft.setTextColor(TFT_RED);
-    tft.print("L3: ");
-    tft.print(l3p, 0);
-    tft.println("W");
-  }
-  else
-  {
-    tft.setTextColor(TFT_GREEN);
-    tft.print("L3: ");
-    tft.print(l3p * -1, 0);
-    tft.println("W");
-  }
+
+  displayData(l1p, "L1: ", l1p >= 0 ? TFT_RED : TFT_GREEN, l1p < 0);
+  displayData(l2p, "L2: ", l2p >= 0 ? TFT_RED : TFT_GREEN, l2p < 0);
+  displayData(l3p, "L3: ", l3p >= 0 ? TFT_RED : TFT_GREEN, l3p < 0);
 
   delay(5000);
 }
