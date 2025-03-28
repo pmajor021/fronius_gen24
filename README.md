@@ -1,12 +1,10 @@
-![GitHub release (with filter)](https://img.shields.io/github/v/release/pmajor021/fronius_gen24?color=%23008000)
-
 # fronius_gen24
 Information display for Fronius Gen24 Inverter and SmartMeter
 
-![fronius_gen24 on Lilygo T-Display-3](https://github.com/user-attachments/assets/ace65480-dd41-408c-989c-845e8e2832ae)
+![fronius_gen24 on Lilygo T-Display-3](https://github.com/user-attachments/assets/0c8e602b-5128-4b10-9781-90ab488df0a9)
 
 GR - Grid (red - from grid, green - to grid), PV - Power from inverter (Batt. + Solar) / Power from solar, LD - Load, 
-B - Battery SoC, L1-3 - Power on each phase (red - from grid, green - to grid)
+B - Battery SoC, L1-3 - Power on each phase (red - from grid, green - to grid), ET - Total Energy today
 
 ## Supported Product
 
