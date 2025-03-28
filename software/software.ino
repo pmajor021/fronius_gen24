@@ -32,7 +32,7 @@ struct tm tm;
 TFT_eSPI tft = TFT_eSPI();
 
 unsigned long targetTime = 0;
-
+static int previousHour = -1;                                                     // Track the previous hour
 float etotal_p = 0;                                                               // Variable to store etotal value at midnight
 
 void setup() {
@@ -98,7 +98,6 @@ void loop() {
   DynamicJsonBuffer jsonBufferMeter(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
   DynamicJsonBuffer jsonBufferFlow(JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(2) + 60);
 
-  static int previousHour = -1;                                                   // Track the previous hour
   time(&now);
   localtime_r(&now, &tm);                                                         // Get the time
   Serial.print("Hour: ");
