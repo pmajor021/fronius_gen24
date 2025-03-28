@@ -28,10 +28,13 @@ Lilygo T-Display-S3
 ## Arduino IDE Manual installation
 
 1. Install [Arduino IDE](https://www.arduino.cc/en/software)
-2. Download `fronius_gen24` , move to Arduino folder (e.g. C:\Users\YourName\Documents\Arduino\)
-3. Copy all folders in [lib folder](./lib/) to Arduino library folder (e.g. C:\Users\YourName\Documents\Arduino\libraries)
-4. Enter the downloaded `software` directory
-5. Open ArduinoIDE ,`Tools` ，Make your selection according to the table below
+2. Open the Arduino IDE.
+3. Click `File` menu -> `Preferences` -> `Additional Development` -> `Additional Board Manager URLs` -> Enter the URL in the input box: `https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json` and click OK.
+4. Click `Tools` menu -> `Board: "...."` -> `Boards Manager...`, install the `esp32` package by `Espressif Systems` **Please pay attention to use version 2.0.17**
+5. Download `fronius_gen24` , move to Arduino folder (e.g. C:\Users\YourName\Documents\Arduino\)
+6. Copy all folders in [lib folder](./lib/) to Arduino library folder (e.g. C:\Users\YourName\Documents\Arduino\libraries)
+7. Enter the downloaded `software` directory
+8. Open ArduinoIDE ,`Tools` ，Make your selection according to the table below
     | Arduino IDE Setting                  | Value                             |
     | ------------------------------------ | --------------------------------- |
     | Board                                | **ESP32S3 Dev Module**            |
@@ -53,5 +56,5 @@ Lilygo T-Display-S3
     | USB Mode                             | **CDC and JTAG**                  |
     * The options in bold are required, others are selected according to actual conditions.
 
-6. Click `upload` , Wait for compilation and writing to complete
+9. Click `upload` , Wait for compilation and writing to complete
 
