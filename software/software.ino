@@ -119,13 +119,14 @@ void loop() {
   float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;                 // Get the power value for the load
   float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;                   // Get the power value for the Solar
 
-  if (previousHour == -1)  
-    etotal_p = etotal;                                                            // Store total energy produced at startup
-  
-  if (previousHour == 23 && tm.tm_hour == 0) {
-    etotal_p = etotal;                                                            // Store total energy produced at midnight
-    Serial.print("Stored E_TOTAL: ");
-    Serial.println(etotal_p);
+  switch (previousHour) {
+    case -1:
+      etotal_p = etotal;                                                          // Store the etotal value at bootup
+      break;
+    case 23:
+      if (tm.tm_hour == 0) 
+        etotal_p = etotal;                                                        // Store the etotal value at midnight
+      break;
   }
   previousHour = tm.tm_hour;
 
@@ -154,7 +155,7 @@ void loop() {
   displayData(l3p, "L3: ", l3p >= 0 ? TFT_RED : TFT_GREEN, l3p < 0);              // Display the power value for phase 3
 
   tft.setTextColor(TFT_LIGHTGREY);
-  tft.print("ED: ");
+  tft.print("ET: ");
   tft.print(etotal - etotal_p, 0);                                                // Display the energy produced today
   tft.println("Wh");
 
