@@ -62,7 +62,7 @@ void setup() {
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
 
-  configTime(3600, 3600, MY_NTP_SERVER);
+  configTzTime(MY_TZ, MY_NTP_SERVER);
 }
 
 // Fetch the data from the Fronius API
