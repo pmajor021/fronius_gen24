@@ -65,7 +65,8 @@ void setup() {
   configTime(3600, 3600, MY_NTP_SERVER);
 }
 
-void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&jsonObject) { // Fetch the data from the Fronius API
+// Fetch the data from the Fronius API
+void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&jsonObject) {
   HTTPClient http;
   http.begin(wifiClient, url);    
   int httpCode = http.GET();                                                      // Make the request
@@ -85,7 +86,8 @@ void fetchData(const String &url, DynamicJsonBuffer &jsonBuffer, JsonObject *&js
   }
 }
 
-void displayData(float value, const char *label, uint16_t color, bool invert = false) { // Display the data on the TFT
+// Display the data on the TFT
+void displayData(float value, const char *label, uint16_t color, bool invert = false) { 
   tft.setTextColor(color);
   tft.print(label);
   tft.print(invert ? value * -1 : value, 0);
@@ -119,17 +121,9 @@ void loop() {
   float cons = (*jsonFlow)["Body"]["Data"]["Site"]["P_Load"] | 0;                 // Get the power value for the load
   float prod = (*jsonFlow)["Body"]["Data"]["Site"]["P_PV"] | 0;                   // Get the power value for the Solar
 
-  switch (previousHour) {
-    case -1:
-      etotal_p = etotal;                                                          // Store the etotal value at bootup
-      break;
-    case 23:
-      if (tm.tm_hour == 0) 
-        etotal_p = etotal;                                                        // Store the etotal value at midnight
-      break;
-  }
+  if (previousHour == -1 || (previousHour == 23 && tm.tm_hour == 0)) 
+      etotal_p = etotal;                                                          // Store the etotal value at startup or midnight
   previousHour = tm.tm_hour;
-
 
   tft.setTextSize(3);
   tft.fillScreen(TFT_BLACK);
@@ -183,6 +177,7 @@ void loop() {
 #error "Error! Please make sure <User_Setups/Setup206_LilyGo_T_Display_S3.h> is selected in <TFT_eSPI/User_Setup_Select.h>"
 #endif
 
+// ESP32 version check
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 #error "The current version is not supported for the time being, please use a version below Arduino ESP32 3.0"
 #endif
